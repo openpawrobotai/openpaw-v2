@@ -48,7 +48,11 @@ from-scratch mechanical design and a custom PCBA with an expanded sensor suite.
 | `Electrical/PCBA Placement Renders/` | Fusion 360 component-placement renders of the custom PCBA (2 Oct 2025) |
 | `Firmware/` | *(pending import — see Missing Files)* |
 | `Design/` | Industrial design & renders |
-| `Docs/` | Project documentation |
+| `Docs/Project Docs/` | Vision, architecture, protocol, roadmap, hardware revisions, devlog & intern guide (from `openpaw-docs`) |
+| `Docs/Ballbot/` | Ball-robot architecture, milestones, development plan & self-balancing research (from `openpaw-ballbot`) |
+| `Docs/ML Knowledge/` | Canine health indicators & signal-to-sensor mapping (from `openpaw-ml`) |
+| `Marketing/` | Build-in-public automation: git push → Discord/Telegram/X posts (from `openpaw-marketing`) |
+| `Web/openpaw-website (skeleton)/` | Early Next.js waitlist-site skeleton (superseded by `openpaw-website_v1`) |
 
 ## ⚠️ Missing Files (known to exist, not yet in this repo)
 

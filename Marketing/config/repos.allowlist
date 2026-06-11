@@ -1,0 +1,6 @@
+# Only these repos may feed build-in-public content.
+# Moat repos (openpaw-app, openpaw-ai) MUST NOT be listed.
+openpaw-firmware
+openpaw-hardware
+openpaw-website
+openpaw-docs

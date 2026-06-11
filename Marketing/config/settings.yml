@@ -1,0 +1,13 @@
+# OpenPaw marketing automation settings
+enabled: true            # master kill switch — false halts all posting
+channels:
+  x:
+    enabled: true
+    max_posts_per_day: 1
+  fanout:
+    instagram: false
+    youtube_shorts: false
+triggers:
+  commit_marker: "[post]"
+  on_release: true
+hashtags: ["#buildinpublic", "#robotics", "#pettech", "#esp32"]

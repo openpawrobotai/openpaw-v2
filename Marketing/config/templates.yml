@@ -1,0 +1,18 @@
+# Post templates by type. The LLM fills these from commit/release context.
+progress: |
+  {what_changed} 🐾
+  {one_line_why}
+  {hashtags}
+it_broke: |
+  Today's bug: {what_broke}.
+  Fix: {how_fixed}. Building in public means showing the messy parts too.
+  {hashtags}
+before_after: |
+  Before → after: {summary}
+  {hashtags}
+milestone: |
+  Milestone: {milestone} 🎉  (video attached)
+  {hashtags}
+ask: |
+  We're building {feature}. What would you want it to do?
+  {hashtags}

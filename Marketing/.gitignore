@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Secrets
+.env
+service-account*.json
+
+# announce: generated manual drafts
+out/
