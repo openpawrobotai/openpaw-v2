@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../constants/app_colors.dart';
 import '../services/ble_provisioning_service.dart';
+import '../services/robot_store.dart';
 import 'robot_control_page.dart';
 import 'remote_control_page.dart';
 
@@ -120,6 +121,10 @@ class _BleWifiSetupPageState extends State<BleWifiSetupPage> {
                   _deviceId = parts[1].replaceAll(':', '').toLowerCase();
                 }
               });
+            }
+            // Remember this robot so future launches skip Wi-Fi setup.
+            if (_robotIp != null && _robotIp!.isNotEmpty) {
+              await RobotStore.save(RobotProfile(host: _robotIp!, deviceId: _deviceId));
             }
           } catch (_) {}
         }

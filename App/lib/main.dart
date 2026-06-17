@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
 import 'constants/app_theme.dart';
-import 'screens/ble_wifi_setup_page.dart';
+import 'screens/root_router.dart';
 import 'services/theme_provider.dart';
 
 void main() async {
@@ -41,9 +41,9 @@ class PawMeApp extends StatelessWidget {
           ? ThemeMode.dark
           : ThemeMode.light,
 
-      // TEMP: skip auth — launch straight into BLE Wi-Fi provisioning for bring-up.
-      // Restore `const SplashScreen()` (import screens/splash_screen.dart) for the full flow.
-      home: const BleWifiSetupPage(),
+      // Remember the provisioned robot: RootRouter sends you straight to the
+      // live camera & controls if one is saved, else to BLE Wi-Fi setup.
+      home: const RootRouter(),
     );
 
   }

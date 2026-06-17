@@ -10,10 +10,13 @@ import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:ffmpeg_kit_flutter_new/session.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:media_scanner/media_scanner.dart';
+import '../services/robot_store.dart';
+import 'ble_wifi_setup_page.dart';
 
 class RobotControlPage extends StatefulWidget {
   final String? initialIp;
-  const RobotControlPage({super.key, this.initialIp});
+  final String? deviceId; // robot MAC w/o colons → WebRTC signaling room id
+  const RobotControlPage({super.key, this.initialIp, this.deviceId});
 
   @override
   State<RobotControlPage> createState() => _RobotControlPageState();
@@ -72,6 +75,41 @@ class _RobotControlPageState extends State<RobotControlPage> {
 
   String get _baseUrl => 'http://$_robotIp';
   String get _streamUrl => 'http://$_robotIp:81/stream';
+
+  /* ==================== ROBOT MANAGEMENT ==================== */
+
+  /// Re-run BLE Wi-Fi setup (e.g. moved to a new network, or the IP changed).
+  void _reprovision() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const BleWifiSetupPage()),
+    );
+  }
+
+  /// Forget the saved robot and return to setup.
+  Future<void> _forgetRobot() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Forget this robot?'),
+        content: const Text(
+            "You'll need to set it up over Bluetooth again to reconnect."),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Forget')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await RobotStore.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const BleWifiSetupPage()),
+    );
+  }
 
   /* ==================== CONNECTION ==================== */
 
@@ -262,6 +300,31 @@ class _RobotControlPageState extends State<RobotControlPage> {
               onPressed: _fetchStatus,
               tooltip: 'Refresh status',
             ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (v) {
+              if (v == 'wifi') _reprovision();
+              if (v == 'forget') _forgetRobot();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'wifi',
+                child: ListTile(
+                  leading: Icon(Icons.wifi),
+                  title: Text('Set up Wi-Fi again'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'forget',
+                child: ListTile(
+                  leading: Icon(Icons.link_off),
+                  title: Text('Forget this robot'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: _robotIp == null
