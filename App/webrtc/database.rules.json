@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "devices": {
+      "$deviceId": {
+        ".read": "auth != null && data.child('owner').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('owner').val() === auth.uid)"
+      }
+    },
+    "webrtc": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('devices').child($deviceId).child('owner').val() === auth.uid",
+        ".write": "auth != null && root.child('devices').child($deviceId).child('owner').val() === auth.uid",
+        "offer":  { ".validate": "newData.hasChildren(['type','sdp'])" },
+        "answer": { ".validate": "newData.hasChildren(['type','sdp'])" },
+        "robotCandidates": { "$pushId": { ".validate": "newData.hasChild('candidate')" } },
+        "appCandidates":   { "$pushId": { ".validate": "newData.hasChild('candidate')" } }
+      }
+    }
+  }
+}
