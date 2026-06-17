@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:media_scanner/media_scanner.dart';
 import '../services/robot_store.dart';
 import 'ble_wifi_setup_page.dart';
+import 'firmware_update_page.dart';
 
 class RobotControlPage extends StatefulWidget {
   final String? initialIp;
@@ -77,6 +78,14 @@ class _RobotControlPageState extends State<RobotControlPage> {
   String get _streamUrl => 'http://$_robotIp:81/stream';
 
   /* ==================== ROBOT MANAGEMENT ==================== */
+
+  /// Open the firmware update / rollback screen for this robot.
+  void _openFirmware() {
+    if (_robotIp == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => FirmwareUpdatePage(host: _robotIp!)),
+    );
+  }
 
   /// Re-run BLE Wi-Fi setup (e.g. moved to a new network, or the IP changed).
   void _reprovision() {
@@ -303,10 +312,19 @@ class _RobotControlPageState extends State<RobotControlPage> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (v) {
+              if (v == 'firmware') _openFirmware();
               if (v == 'wifi') _reprovision();
               if (v == 'forget') _forgetRobot();
             },
             itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'firmware',
+                child: ListTile(
+                  leading: Icon(Icons.system_update),
+                  title: Text('Firmware update'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
               PopupMenuItem(
                 value: 'wifi',
                 child: ListTile(
