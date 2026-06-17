@@ -31,6 +31,7 @@ dependencies:
   # UI & Media
   webview_flutter: ^4.7.0
   provider: ^6.0.5
+  google_fonts: ^6.2.1
   http: ^1.1.0
   shared_preferences: ^2.2.2
   flutter_mjpeg: ^2.0.1
