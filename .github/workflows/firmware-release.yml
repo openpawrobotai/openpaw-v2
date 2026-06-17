@@ -1,0 +1,87 @@
+name: firmware-release
+
+# Tagging vX.Y.Z publishes the OTA update:
+# builds one .bin per board from Firmware/, generates manifest.json, attaches
+# all to a GitHub Release. The robot/app read releases/latest/download/manifest.json.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Each board maps to its silicon target.
+        include:
+          - board: esp32_ball_v1
+            target: esp32s3
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pin the embedded app version to the tag so it matches the manifest
+      # exactly (ESP-IDF uses Firmware/version.txt verbatim for esp_app_desc.version).
+      - name: Pin firmware version
+        run: echo "${GITHUB_REF_NAME}" > Firmware/version.txt
+
+      - name: Build firmware (${{ matrix.board }})
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5
+          target: ${{ matrix.target }}
+          path: Firmware
+          command: idf.py -DOPENPAW_BOARD=${{ matrix.board }} build
+
+      - name: Stage artifact
+        run: |
+          mkdir -p dist
+          VER="${GITHUB_REF_NAME}"
+          BIN="dist/openpaw-fw-${VER}-${{ matrix.board }}.bin"
+          cp Firmware/build/openpaw.bin "$BIN"
+          echo "SHA256=$(sha256sum "$BIN" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fw-${{ matrix.board }}
+          path: dist/*.bin
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+
+      - name: Generate manifest.json
+        run: |
+          # Keep the leading "v": must match the version the firmware reports.
+          VER="${GITHUB_REF_NAME}"
+          REPO="${GITHUB_REPOSITORY}"
+          echo '{' > manifest.json
+          echo "  \"channel\": \"stable\"," >> manifest.json
+          echo "  \"generated_at\": \"$(date -u +%FT%TZ)\"," >> manifest.json
+          echo '  "boards": {' >> manifest.json
+          first=1
+          for bin in dist/*.bin; do
+            name=$(basename "$bin"); board=$(echo "$name" | sed -E 's/.*-([a-z0-9_]+)\.bin/\1/')
+            sha=$(sha256sum "$bin" | cut -d' ' -f1); size=$(stat -c%s "$bin")
+            url="https://github.com/${REPO}/releases/download/${GITHUB_REF_NAME}/${name}"
+            [ $first -eq 0 ] && echo ',' >> manifest.json; first=0
+            printf '    "%s": {"version": "%s", "url": "%s", "sha256": "%s", "size": %s}' \
+              "$board" "$VER" "$url" "$sha" "$size" >> manifest.json
+          done
+          echo '' >> manifest.json; echo '  }' >> manifest.json; echo '}' >> manifest.json
+          cat manifest.json
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.bin
+            manifest.json
+          generate_release_notes: true
