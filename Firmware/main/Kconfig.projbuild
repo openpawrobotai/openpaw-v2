@@ -1,0 +1,31 @@
+menu "OpenPaw"
+
+    config OPENPAW_WIFI_SSID
+        string "Dev Wi-Fi SSID"
+        default ""
+        help
+            Fallback station SSID used when no credentials are stored in NVS.
+            For development only — production creds arrive via BLE provisioning.
+            Leave blank to wait for provisioning instead.
+
+    config OPENPAW_WIFI_PASS
+        string "Dev Wi-Fi password"
+        default ""
+        help
+            Password for the dev Wi-Fi SSID above.
+
+    config OPENPAW_OTA_MANIFEST_URL
+        string "OTA manifest URL"
+        default "https://github.com/openpawrobotai/openpaw-v2/releases/latest/download/manifest.json"
+        help
+            HTTPS URL of the firmware manifest JSON ({"boards":{...}}). Defaults
+            to the latest public GitHub release. Leave blank to disable OTA.
+
+    config OPENPAW_OTA_CHECK_ON_BOOT
+        bool "Check for OTA update on every boot"
+        default n
+        help
+            When set, the device checks the manifest URL for a newer build each
+            time Wi-Fi connects. Updates are normally triggered from the app.
+
+endmenu
